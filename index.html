@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="svg-demo">
+
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular.min.js"></script>
+  <link href="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/foundation.min.css" rel="stylesheet" />
+  <title>SVGS</title>
+
+  <style>
+    body {
+      font-family: verdana;
+      text-align: center;
+    }
+
+    .row {
+      margin-bottom: 20px;
+    }
+
+    svg {
+      width: 60px;
+      height: 60px;
+    }
+
+    .small svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .big svg {
+      width: 100px;
+      height: 100px;
+    }
+
+    ul li {
+      padding-top: 20px !important;
+    }
+
+    .duplicated {
+      background: #FBE0E0;
+    }
+  </style>
+
+  <script>
+    angular.module("svg-demo", [])
+      .controller("indexController", ["$scope", "$http",
+        function($scope, $http) {
+          $scope.bodyClass = localStorage.getItem("body-class") || 'medium';
+          $scope.icons = [];
+
+
+          $scope.$watch("path", function(path) {
+            if(!path){
+              return;
+            }
+
+            $http.get(path).success(function(data) {
+              var icons = data.split("id=\"");
+              icons.splice(0, 1);
+
+              $scope.icons = icons.map(function(item) {
+                return {
+                  icon:  path + "#" + item.split("\"")[0]
+                };
+              });
+            });
+          })
+
+
+          $scope.$watch("bodyClass", function(value) {
+            localStorage.setItem("body-class", value);
+          });
+
+          $scope.countDuplicated = function() {
+            return $scope.icons.filter(function(item) {
+              return item.duplicated;
+            }).length;
+          }
+
+          $scope.isDuplicated = function(icon) {
+            return $scope.icons.filter(function(item) {
+              return item.icon == icon;
+            }).length > 1;
+          }
+        }
+      ]);
+  </script>
+</head>
+
+<body ng-controller="indexController" ng-class="bodyClass">
+
+  <div class="container">
+    <h1>Svg Generator Map</h1>
+
+    <div class="row">
+      <div class="medium-3 columns">
+        <select ng-model="path" ng-init="path = 'icons.svg'">
+          <option value="icons.svg">icons.svg</option>
+          <option value="icons-pixel.svg">icons-pixel.svg</option>
+        </select>
+      </div>
+      <div class="medium-9 columns">
+        <input type="text" ng-model="search" placeholder="Search..." />
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="medium-6 columns text-left">
+        {{icons.length}} symbols
+        <br> {{countDuplicated()}} symbols duplicated
+      </div>
+      <div class="medium-6 columns">
+        <div class="right">
+          <label>Size:</label>
+          <ul class="button-group radius">
+            <li>
+              <button class="small" ng-click="bodyClass = 'small'">Small</button>
+            </li>
+            <li>
+              <button class="small" ng-click="bodyClass = 'medium'">Medium</button>
+            </li>
+            <li>
+              <button class="small" ng-click="bodyClass = 'big'">Big</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+      <ul ng-class="{ 'small-block-grid-6': bodyClass == 'small', 'small-block-grid-4': bodyClass == 'medium', 'small-block-grid-3': bodyClass == 'big'  }">
+        <li ng-repeat="item in icons | filter: search | orderBy: 'icon' " ng-class="{ duplicated : isDuplicated(item.icon) }" ng-init="item.duplicated = isDuplicated(item.icon)">
+          <svg class="icon">
+            <use xlink:href="{{item.icon}}"></use>
+          </svg>
+          <p>
+            {{item.icon.replace(path, "")}}
+          </p>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</body>
+
+</html>
