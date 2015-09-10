@@ -39,6 +39,11 @@
     .duplicated {
       background: #FBE0E0;
     }
+
+    code{
+      display: block;
+      margin-top: 20px;
+    }
   </style>
 
   <script>
@@ -50,7 +55,7 @@
 
 
           $scope.$watch("path", function(path) {
-            if(!path){
+            if (!path) {
               return;
             }
 
@@ -60,7 +65,7 @@
 
               $scope.icons = icons.map(function(item) {
                 return {
-                  icon:  path + "#" + item.split("\"")[0]
+                  icon: path + "#" + item.split("\"")[0]
                 };
               });
             });
@@ -92,6 +97,7 @@
   <div class="container">
     <h1>Svg Generator Map</h1>
 
+
     <div class="row">
       <div class="medium-3 columns">
         <select ng-model="path" ng-init="path = 'icons.svg'">
@@ -109,6 +115,12 @@
       <div class="medium-6 columns text-left">
         {{icons.length}} symbols
         <br> {{countDuplicated()}} symbols duplicated
+
+        <code>
+          &lt;svg class=&quot;icon&quot;&gt;<br>
+           &nbsp;&nbsp;&nbsp;&nbsp; &lt;use xlink:href=&quot;{{path}}#id&quot;&gt;&lt;/use&gt;<br>
+          &lt;/svg&gt;
+        </code>
       </div>
       <div class="medium-6 columns">
         <div class="right">
@@ -126,6 +138,7 @@
           </ul>
         </div>
       </div>
+
     </div>
 
     <hr />
